@@ -49,14 +49,20 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public String deleteUser(@PathVariable String id) {
+        logger.info("Deleting user with ID: {}", id);
+        userRepository.deleteById(id);
+        logger.info("User deleted successfully with ID: {}", id);
+        return "User deleted successfully";
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public User updateUser(@PathVariable String id, @RequestBody User user) {
         logger.info("Updating user with ID: {}", id);
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> {
-                    logger.error("User not found with ID: {}", id);
-                    return new ResourceNotFoundException("User not found");
-                });
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         existingUser.setUsername(user.getUsername());
         existingUser.setRoles(user.getRoles());
@@ -66,12 +72,4 @@ public class UserController {
         return updatedUser;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable String id) {
-        logger.info("Deleting user with ID: {}", id);
-        userRepository.deleteById(id);
-        logger.info("User deleted successfully with ID: {}", id);
-        return "User deleted successfully";
-    }
 }

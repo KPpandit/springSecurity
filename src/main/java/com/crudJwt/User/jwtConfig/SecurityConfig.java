@@ -21,7 +21,7 @@ public class SecurityConfig {
     private JwtFilter jwtFilter;
 
     @Autowired
-    private CustomAccessDeniedHandler accessDeniedHandler; // Inject the custom handler
+    private CustomAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -32,15 +32,14 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/auth/**"))
+                .csrf(csrf -> csrf.disable())  // Disable CSRF protection entirely
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users").hasRole("ADMIN") // Only ADMIN can access /api/users
-                        .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "FINANCE") // Allow both ADMIN and FINANCE for /api/users/{id}
+                        .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "FINANCE") // ADMIN and FINANCE can access get by ID
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptionHandling ->
@@ -51,4 +50,5 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 }
